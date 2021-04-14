@@ -1,0 +1,21 @@
+version: "3.5"
+
+services:
+  app: 
+    build:
+      context: ./
+      dockerfile: Dockerfile-app
+    volumes:
+      - ./:/app
+
+  db_default:
+    image: "postgres:13.0"
+    hostname: db_default
+    environment:
+      POSTGRES_PASSWORD: "app"
+      POSTGRES_USER: "app"
+      POSTGRES_DB: "app"
+    ports:
+      - "5432:5432"
+
+  # server:

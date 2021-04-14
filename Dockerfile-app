@@ -1,0 +1,20 @@
+FROM python:3.8-alpine
+
+ENV LANG C.UTF-8
+ENV LC_ALL C.UTF-8
+
+RUN mkdir /app
+COPY requirements.txt /app
+
+RUN apk update && \
+    apk add --no-cache --virtual .build-deps \
+    ca-certificates gcc postgresql-dev linux-headers musl-dev \
+    libffi-dev jpeg-dev zlib-dev \
+    git bash
+
+RUN pip install -r /app/requirements.txt
+
+COPY ./ /app
+WORKDIR /app
+
+ENTRYPOINT ["python", "manage.py", "runserver", "0.0.0.0"]
