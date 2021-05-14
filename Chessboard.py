@@ -63,7 +63,7 @@ class ChessBoard:
                 try:
                     # Spróbuj ze słownikiem pól szachownicy: {"A1": (0, 0), ...}
                     coordinates = player_input.split(' ')[:2]
-                    if coordinates[0].upper() not in self.letters or int(coordinates[1]) in list(range(1, 9)):
+                    if coordinates[0].upper() not in self.letters or int(coordinates[1]) not in range(1, 9):
                         raise ChessError(
                             'First value must be letter from A to H and second value must be integer from 1 to 8')
 
@@ -113,8 +113,8 @@ class ChessBoard:
             self.chessboard[move_coordinates] = piece
             self.chessboard[old_position] = None
             piece.move(move_coordinates)
-            
-            turn = 'B' if turn == 'W' else turn = 'W' 
+
+            turn = 'B' if turn == 'W' else 'W' 
 
 
 if __name__ == '__main__':

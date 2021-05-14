@@ -95,10 +95,10 @@ class Knight(Piece):
 
         for direction in [[2, 1], [2, -1], [-2, 1], [-2, -1], [1, 2], [1, -2], [-1, 2], [-1, -2]]:
             next_position = current_position + direction
-            if self.check_move(next_position):
-                if chessboard[next_position] == None:
+            if self.check_move(tuple(next_position)):
+                if chessboard[tuple(next_position)] == None:
                     available_moves.append(tuple(next_position))
-                elif isinstance(chessboard[next_position], Piece) and chessboard[next_position].color != self.color:
+                elif isinstance(chessboard[next_position], Piece) and chessboard[tuple(next_position)].color != self.color:
                     available_attacks.append(tuple(next_position))
 
         return available_moves, available_attacks
@@ -135,10 +135,10 @@ class King(Piece):
             next_position = current_position + direction
 
             if self.check_move(tuple(next_position)):
-                if chessboard[next_position] == None:
+                if chessboard[tuple(next_position)] == None:
                     available_moves.append(tuple(next_position))
 
-                elif isinstance(chessboard[next_position], Piece) and chessboard[next_position].color != self.color:
+                elif isinstance(chessboard[tuple(next_position)], Piece) and chessboard[tuple(next_position)].color != self.color:
                     available_attacks.append(tuple(next_position))
 
         return available_moves, available_attacks
