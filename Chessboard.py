@@ -1,5 +1,4 @@
 import numpy as np
-# from Pawn import Piece, Pawn, Bishop, Knight, Rook, King, Queen
 import Pieces as piece_module
 
 
@@ -57,40 +56,31 @@ class ChessBoard:
         print_border()
         print(f'   {"".join([f"{i}   " for i in range(1, 9)])}')
 
-    # Ogranicz niepotrzebne pętle w wyborze pionów
-    def get_player_move(self, input_message, turn, selected_pawn=None):
+    def get_player_move(self, turn):
         while True:
-            player_input = input(input_message)
-            if player_input == 'board':
-                self.print_board()
-            elif selected_pawn and player_input == 'cancel':
-                return player_input
-            else:
-                try:
-                    # Spróbuj ze słownikiem pól szachownicy: {"A1": (0, 0), ...}
-                    coordinates = player_input.split(' ')[:2]
-                    if coordinates[0].upper() not in self.letters or int(coordinates[1]) not in range(1, 9):
-                        raise ChessError(
-                            'First value must be letter from A to H and second value must be integer from 1 to 8')
+            try:
+                player_input = input('Select the piece and place you want to move it (eg. F0 E3).\nType "board" to display board on console: ')
+                player_move = player_input.split(' ')[:2]
 
-                    coordinates = self.letters.index(
-                        coordinates[0].upper()), int(coordinates[1]) - 1
-                    # {
-                    # "A1" : (0,0)
-                    # }
-                    if selected_pawn:
-                        moves, attacks = selected_pawn.get_available_moves(
-                            self.chessboard)
-                        if coordinates not in moves and coordinates not in attacks:
-                            raise ChessError('Illegal move')
-                    else:
-                        temp_piece = self.chessboard[coordinates]
-                        if not temp_piece or temp_piece.color != turn:
-                            raise ChessError('Choose a figure of your color.')
+                if len(player_move) < 2:
+                    raise ChessError('>Please give two arguments separated by space.')
+                if not set(player_move).issubset(self.chess_fields.keys()):
+                    raise ChessError('>First value should be between A and H and second between 1 and 8.')
 
-                    return coordinates
-                except ChessError as chessErr:
-                    print(chessErr)
+                piece, move = player_move
+                piece = self.chessboard[self.chess_fields[piece]]
+                if not piece or (isinstance(piece, piece_module.Piece) and piece.color != turn):
+                    raise ChessError('>Please select the piece of Your color.')
+                
+                moves, attacks = piece.get_available_moves(self.chessboard)
+                if self.chess_fields[move] not in moves + attacks:
+                    raise ChessError('>Illegal move')
+
+                return piece, self.chess_fields[move]
+
+            except ChessError as chess_error:
+                print(chess_error)
+
 
     def game(self):
         turn = 'W'
@@ -100,30 +90,15 @@ class ChessBoard:
             print('White turn') if turn == 'W' else print('Black turn')
             self.print_board()
 
-            while True:
-                piece_coordinates = self.get_player_move(
-                    'Select the piece you want to move. Type "board" in console to display chessboard\n',
-                    turn
-                )
-                piece = self.chessboard[piece_coordinates]
-                move_coordinates = self.get_player_move(
-                    'Select place you want your piece to move. Type "board" in console to display chessboard.\nType "cancel" to deselect the piece.\n',
-                    turn,
-                    selected_pawn=piece
-                )
-                if move_coordinates != 'cancel':
-                    break
+            piece, move = self.get_player_move(turn)
 
-            old_position = piece.x, piece.y
-
-            self.chessboard[move_coordinates] = piece
-            self.chessboard[old_position] = None
-            piece.move(move_coordinates)
+            self.chessboard[move] = piece
+            self.chessboard[piece.get_position()] = None
+            piece.move(move)
 
             turn = 'B' if turn == 'W' else 'W'
 
 
 if __name__ == '__main__':
     board = ChessBoard()
-    board.print_board()
-    # [print('+---', end='') for _ in range(8)]
+    board.game()

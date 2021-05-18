@@ -21,6 +21,9 @@ class Piece:
 
     def check_move(self, move):
         return all(x < y and x >= 0 for x, y in zip(move, (8, 8)))
+    
+    def get_position(self):
+        return (self.x, self.y)
 
     def check_diagonal(self, direction, chessboard):
         available_moves = []
