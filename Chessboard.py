@@ -27,8 +27,6 @@ class ChessBoard:
         for i in range(8):
             self.chessboard[i, 6] = Pawn(i, 6, 'B')
 
-# popraw rozmieszczenie pionów ( w pętli)
-        # piece_module = importlib.import_module('Pawn')
         piece_kinds = ['Rook', 'Knight', 'Bishop', 'Queen', 'King']
 
         for i, piece_kind in enumerate(piece_kinds):
@@ -40,17 +38,24 @@ class ChessBoard:
                 self.chessboard[7 - i, 0] = piece(7-i, 0, 'W')
                 self.chessboard[7 - i, 7] = piece(7-i, 7, 'B')
 
-
     def print_board(self):
+        def print_border():
+            print(' ', end='')
+            [print('+---', end='') for _ in range(8)]
+            print('+')
+
         for x in range(8):
-            print(f'{self.letters[x]}[ ', end='')
+            print_border()
+            print(f'{self.letters[x]}', end='')
             for y in range(8):
                 if self.chessboard[x, y]:
-                    print(f'{str(self.chessboard[x, y])} ', end='')
+                    print(f'| {str(self.chessboard[x, y])} ', end='')
                 else:
-                    print('O ', end='')
-            print(']')
-        print(f'X[ {"".join([f"{i} " for i in range(1, 9)])}]')
+                    print('|   ', end='')
+            print('|')
+
+        print_border()
+        print(f'   {"".join([f"{i}   " for i in range(1, 9)])}')
 
     # Ogranicz niepotrzebne pętle w wyborze pionów
     def get_player_move(self, input_message, turn, selected_pawn=None):
@@ -71,7 +76,7 @@ class ChessBoard:
                     coordinates = self.letters.index(
                         coordinates[0].upper()), int(coordinates[1]) - 1
                     # {
-                    # "A1" : (0,0) 
+                    # "A1" : (0,0)
                     # }
                     if selected_pawn:
                         moves, attacks = selected_pawn.get_available_moves(
@@ -115,9 +120,10 @@ class ChessBoard:
             self.chessboard[old_position] = None
             piece.move(move_coordinates)
 
-            turn = 'B' if turn == 'W' else 'W' 
+            turn = 'B' if turn == 'W' else 'W'
 
 
 if __name__ == '__main__':
     board = ChessBoard()
-    board.game()
+    board.print_board()
+    # [print('+---', end='') for _ in range(8)]
