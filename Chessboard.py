@@ -1,5 +1,6 @@
 import numpy as np
-from Pawn import Piece, Pawn, Bishop, Knight, Rook, King, Queen
+# from Pawn import Piece, Pawn, Bishop, Knight, Rook, King, Queen
+import Pieces as piece_module
 
 
 class ChessError(Exception):
@@ -11,6 +12,8 @@ class ChessBoard:
     letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
 
     def __init__(self):
+        Piece = piece_module.Piece
+        Pawn = piece_module.Pawn
         self.chess_fields = {}
         for i in range(8):
             for j in range(8):
@@ -25,26 +28,18 @@ class ChessBoard:
             self.chessboard[i, 6] = Pawn(i, 6, 'B')
 
 # popraw rozmieszczenie pionów ( w pętli)
-        self.chessboard[2, 0] = Bishop(2, 0, 'W')
-        self.chessboard[5, 0] = Bishop(5, 0, 'W')
-        self.chessboard[2, 7] = Bishop(2, 7, 'B')
-        self.chessboard[5, 7] = Bishop(5, 7, 'B')
+        # piece_module = importlib.import_module('Pawn')
+        piece_kinds = ['Rook', 'Knight', 'Bishop', 'Queen', 'King']
 
-        self.chessboard[1, 0] = Knight(1, 0, 'W')
-        self.chessboard[6, 0] = Knight(6, 0, 'W')
-        self.chessboard[1, 7] = Knight(1, 7, 'B')
-        self.chessboard[6, 7] = Knight(6, 7, 'B')
+        for i, piece_kind in enumerate(piece_kinds):
+            piece = getattr(piece_module, piece_kind)
+            self.chessboard[i, 0] = piece(i, 0, 'W')
+            self.chessboard[i, 7] = piece(i, 7, 'B')
 
-        self.chessboard[0, 0] = Rook(0, 0, 'W')
-        self.chessboard[7, 0] = Rook(7, 0, 'W')
-        self.chessboard[0, 7] = Rook(0, 7, 'B')
-        self.chessboard[7, 7] = Rook(7, 7, 'B')
+            if i < 3:
+                self.chessboard[7 - i, 0] = piece(7-i, 0, 'W')
+                self.chessboard[7 - i, 7] = piece(7-i, 7, 'B')
 
-        self.chessboard[4, 0] = King(4, 0, 'W')
-        self.chessboard[4, 7] = King(4, 7, 'B')
-
-        self.chessboard[3, 0] = Queen(3, 0, 'W')
-        self.chessboard[3, 7] = Queen(3, 7, 'B')
 
     def print_board(self):
         for x in range(8):
@@ -124,5 +119,5 @@ class ChessBoard:
 
 
 if __name__ == '__main__':
-    game = ChessBoard()
-    game.game()
+    board = ChessBoard()
+    board.game()
