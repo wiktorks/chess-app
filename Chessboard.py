@@ -11,6 +11,11 @@ class ChessBoard:
     letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
 
     def __init__(self):
+        self.chess_fields = {}
+        for i in range(8):
+            for j in range(8):
+                self.chess_fields[f'{self.letters[i]}{j + 1}'] = (i, j)
+
         self.chessboard = np.array(
             [None for _ in range(64)], dtype=Piece).reshape(8, 8)
         for i in range(8):
@@ -18,6 +23,7 @@ class ChessBoard:
 
         for i in range(8):
             self.chessboard[i, 6] = Pawn(i, 6, 'B')
+
 # popraw rozmieszczenie pionów ( w pętli)
         self.chessboard[2, 0] = Bishop(2, 0, 'W')
         self.chessboard[5, 0] = Bishop(5, 0, 'W')
