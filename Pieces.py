@@ -19,9 +19,14 @@ class Piece:
         self.x, self.y = move
         self.start_position = False
 
-    def check_move(self, move):
-        return all(x < y and x >= 0 for x, y in zip(move, (8, 8)))
     
+    def check_move(self, move):
+        x, y = move
+        if x >= 0 and y >= 0 and x < 8 and y < 8:
+            return True
+
+        return False
+
     def get_position(self):
         return (self.x, self.y)
 
@@ -99,9 +104,11 @@ class Knight(Piece):
         for direction in [[2, 1], [2, -1], [-2, 1], [-2, -1], [1, 2], [1, -2], [-1, 2], [-1, -2]]:
             next_position = current_position + direction
             if self.check_move(tuple(next_position)):
+                piece = chessboard[tuple(next_position)]
                 if chessboard[tuple(next_position)] == None:
                     available_moves.append(tuple(next_position))
-                elif isinstance(chessboard[next_position], Piece) and chessboard[tuple(next_position)].color != self.color:
+                    # (2, 6)
+                elif isinstance(chessboard[tuple(next_position)], Piece) and chessboard[tuple(next_position)].color != self.color:
                     available_attacks.append(tuple(next_position))
 
         return available_moves, available_attacks
@@ -129,6 +136,27 @@ class Rook(Piece):
 
 
 class King(Piece):
+    def is_check(self, chessboard):
+        current_position = np.array(self.get_position())
+        for direction in [[0, 1], [0, -1], [-1, 0], [1, 0], [1, 1], [1, -1], [-1, -1], [-1, 1]]:
+            _, attacks = self.check_diagonal(direction, chessboard)
+
+        if attacks:
+            for position in attacks:
+                piece = chessboard[position]
+                _, piece_attacks = piece.get_available_moves(chessboard)
+                if self.get_position() in piece_attacks:
+                    return True
+
+        for next_position in [[2, 1], [2, -1], [-2, 1], [-2, -1], [1, 2], [1, -2], [-1, 2], [-1, -2]]:
+            move = tuple(current_position + next_position)
+            if self.check_move(move):
+                piece = chessboard[move]
+                if str(piece) in ['h', 'H'] and piece.color != self.color:
+                    return True
+
+        return False
+
     def get_available_moves(self, chessboard):
         available_moves = []
         available_attacks = []
