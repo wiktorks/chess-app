@@ -36,51 +36,78 @@ class ChessBoard:
             if i < 3:
                 self.chessboard[7 - i, 0] = piece(7-i, 0, 'W')
                 self.chessboard[7 - i, 7] = piece(7-i, 7, 'B')
+                
+            if i == 4:
+                self.kings = {
+                    'W': self.chessboard[i, 0],
+                    'B': self.chessboard[i, 7]
+                }   
 
     def print_board(self):
         def print_border():
-            print(' ', end='')
+            print('  ', end='')
             [print('+---', end='') for _ in range(8)]
             print('+')
 
+        chessboard = np.flip(np.copy(self.chessboard), axis=1).transpose()
+
         for x in range(8):
             print_border()
-            print(f'{self.letters[x]}', end='')
+            print(f'{8 - x} ', end='')
             for y in range(8):
-                if self.chessboard[x, y]:
-                    print(f'| {str(self.chessboard[x, y])} ', end='')
+                if chessboard[x, y]:
+                    print(f'| {str(chessboard[x, y])} ', end='')
                 else:
                     print('|   ', end='')
             print('|')
 
         print_border()
-        print(f'   {"".join([f"{i}   " for i in range(1, 9)])}')
+        print(f'    {"".join([f"{self.letters[i]}   " for i in range(8)])}')
 
     def get_player_move(self, turn):
         while True:
             try:
-                player_input = input('Select the piece and place you want to move it (eg. F0 E3).\nType "board" to display board on console: ')
+                player_input = input(
+                    'Select the piece and place you want to move it (eg. G1 F3).\nType "board" to display board on console: ')
                 player_move = player_input.split(' ')[:2]
 
                 if len(player_move) < 2:
-                    raise ChessError('>Please give two arguments separated by space.')
+                    raise ChessError(
+                        '>Please give two arguments separated by space.')
                 if not set(player_move).issubset(self.chess_fields.keys()):
-                    raise ChessError('>First value should be between A and H and second between 1 and 8.')
+                    raise ChessError(
+                        '>First value should be between A and H and second between 1 and 8.')
 
                 piece, move = player_move
                 piece = self.chessboard[self.chess_fields[piece]]
                 if not piece or (isinstance(piece, piece_module.Piece) and piece.color != turn):
                     raise ChessError('>Please select the piece of Your color.')
-                
+
                 moves, attacks = piece.get_available_moves(self.chessboard)
-                if self.chess_fields[move] not in moves + attacks:
+                all_moves = moves + attacks
+                
+                king = self.kings[turn]
+                def filter_check_moves(move):
+                    chessboard_copy = np.copy(self.chessboard)
+                    chessboard_copy[move] = piece
+                    chessboard_copy[piece.get_position()] = None
+
+                    return not king.is_check(chessboard_copy)
+
+                if king.is_check(self.chessboard):
+                    all_moves = list(filter(filter_check_moves, all_moves))
+                    if not all_moves:
+                        raise ChessError('You are in check. You have to negate it!')
+                
+                all_moves = list(filter(filter_check_moves, all_moves))
+
+                if self.chess_fields[move] not in all_moves:
                     raise ChessError('>Illegal move')
 
                 return piece, self.chess_fields[move]
 
             except ChessError as chess_error:
                 print(chess_error)
-
 
     def game(self):
         turn = 'W'
