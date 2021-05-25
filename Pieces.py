@@ -33,7 +33,6 @@ class Piece:
     def check_diagonal(self, direction, chessboard):
         available_moves = []
         available_attacks = []
-        # [1, 1] + [0, 1] = [1, 2]
         position = np.array([self.x, self.y]) + direction
 
         while np.all(position >= 0) and np.all(position < 8):
@@ -55,7 +54,7 @@ class Piece:
 
 
 class Pawn(Piece):
-    def get_available_moves(self, chessboard):
+    def get_moves(self, chessboard):
         available_moves = []
         available_attacks = []
 
@@ -78,7 +77,7 @@ class Pawn(Piece):
 
 
 class Bishop(Piece):
-    def get_available_moves(self, chessboard):
+    def get_moves(self, chessboard):
         available_moves = []
         available_attacks = []
 
@@ -96,7 +95,7 @@ class Bishop(Piece):
 
 
 class Knight(Piece):
-    def get_available_moves(self, chessboard):
+    def get_moves(self, chessboard):
         available_moves = []
         available_attacks = []
         current_position = np.array([self.x, self.y])
@@ -118,7 +117,7 @@ class Knight(Piece):
 
 
 class Rook(Piece):
-    def get_available_moves(self, chessboard):
+    def get_moves(self, chessboard):
         available_moves = []
         available_attacks = []
 
@@ -144,7 +143,7 @@ class King(Piece):
         if attacks:
             for position in attacks:
                 piece = chessboard[position]
-                _, piece_attacks = piece.get_available_moves(chessboard)
+                _, piece_attacks = piece.get_moves(chessboard)
                 if self.get_position() in piece_attacks:
                     return True
 
@@ -157,7 +156,7 @@ class King(Piece):
 
         return False
 
-    def get_available_moves(self, chessboard):
+    def get_moves(self, chessboard):
         available_moves = []
         available_attacks = []
         current_position = np.array([self.x, self.y])
@@ -179,7 +178,7 @@ class King(Piece):
 
 
 class Queen(Piece):
-    def get_available_moves(self, chessboard):
+    def get_moves(self, chessboard):
         available_moves = []
         available_attacks = []
 
