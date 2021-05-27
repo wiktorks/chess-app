@@ -1,8 +1,5 @@
 import numpy as np
 
-# string przy kolorze
-# BS BQ WS WQ  black b Black B
-
 
 class Piece:
     def __init__(self, x, y, color):
@@ -48,9 +45,6 @@ class Piece:
 
         return available_moves, available_attacks
 
-# dekorator property (metody jako atrybuty)
-# popraw metodę, uwzględnij ruchy czarnego piona (property nie przejdzie, trzeba dodatkowego argumentu)
-# Google excel do notowania ile czasu upłynęło
 
 
 class Pawn(Piece):
@@ -137,11 +131,13 @@ class Rook(Piece):
 class King(Piece):
     def is_check(self, chessboard):
         current_position = np.array(self.get_position())
+        all_attacks = []
         for direction in [[0, 1], [0, -1], [-1, 0], [1, 0], [1, 1], [1, -1], [-1, -1], [-1, 1]]:
             _, attacks = self.check_diagonal(direction, chessboard)
-
-        if attacks:
-            for position in attacks:
+            all_attacks += attacks
+        
+        if all_attacks:
+            for position in all_attacks:
                 piece = chessboard[position]
                 _, piece_attacks = piece.get_moves(chessboard)
                 if self.get_position() in piece_attacks:

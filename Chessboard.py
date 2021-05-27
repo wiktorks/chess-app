@@ -1,4 +1,5 @@
 import numpy as np
+from copy import deepcopy
 import Pieces as piece_module
 
 
@@ -60,30 +61,38 @@ class ChessBoard:
         print(border)
         print(f'    {"".join([f"{self.letters[i]}   " for i in range(8)])}')
 
-    def get_available_moves(self, piece):
+    def get_available_moves(self, piece, enemy_turn=False):
         moves, attacks = piece.get_moves(self.chessboard)
         all_moves = moves + attacks
 
-        king = self.kings[self.turn]
+        if enemy_turn:
+            king = deepcopy(self.kings['W' if self.turn == 'B' else 'B'])
+        else:
+            king = deepcopy(self.kings[self.turn])
 
         def filter_check_moves(move):
             chessboard_copy = np.copy(self.chessboard)
             chessboard_copy[move] = piece
             chessboard_copy[piece.get_position()] = None
+            if str(piece) in ['k', 'K']:
+                king.move(move)
 
             return not king.is_check(chessboard_copy)
-
-        # if king.is_check(self.chessboard):
-        #     all_moves = list(filter(filter_check_moves, all_moves))
 
         return list(filter(filter_check_moves, all_moves))
 
     def get_player_move_input(self):
         invalid_move = True
+
         while invalid_move:
             try:
                 player_input = input(
                     'Select the piece and place you want to move it (eg. G1 F3).\nType "board" to display board on console: ')
+
+                if player_input == 'board':
+                    self.print_board()
+                    continue
+
                 player_move = player_input.split(' ')[:2]
 
                 if len(player_move) < 2:
@@ -107,7 +116,7 @@ class ChessBoard:
                 invalid_move = False
             except ChessError as chess_error:
                 print(chess_error)
-                
+
         return piece, self.chess_fields[move]
 
     def game(self):
@@ -122,8 +131,34 @@ class ChessBoard:
             self.chessboard[piece.get_position()] = None
             piece.move(move)
 
-            enemy_king = self.kings['B' if self.turn == 'W' else 'W']
+            if str(piece) == 'K':
+                self.kings[self.turn] = piece
 
+            check = False
+            enemy_king = self.kings['B' if self.turn == 'W' else 'W']
+            if enemy_king.is_check(self.chessboard):
+                print('CHECK!!!')
+                check = True
+
+            end_game = False
+            try:
+                for row in self.chessboard:
+                    for field in row:
+                        if isinstance(field, piece_module.Piece) and field.color != self.turn:
+                            moves = self.get_available_moves(
+                                field, enemy_turn=True)
+                            if moves:
+                                raise ChessError()
+                end_game = True
+            except ChessError:
+                pass
+            
+            if end_game:
+                if check:
+                    print(f'{"White" if self.turn == "W" else "Black"} won!')
+                else:
+                    print('Stalemate.')
+                break
 
             self.turn = 'B' if self.turn == 'W' else 'W'
 
