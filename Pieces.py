@@ -1,4 +1,5 @@
 import numpy as np
+from itertools import product, combinations, permutations
 
 
 class Piece:
@@ -16,7 +17,6 @@ class Piece:
         self.x, self.y = move
         self.start_position = False
 
-    
     def check_move(self, move):
         x, y = move
         if x >= 0 and y >= 0 and x < 8 and y < 8:
@@ -44,7 +44,6 @@ class Piece:
                     break
 
         return available_moves, available_attacks
-
 
 
 class Pawn(Piece):
@@ -75,7 +74,7 @@ class Bishop(Piece):
         available_moves = []
         available_attacks = []
 
-        for direction in [[1, 1], [1, -1], [-1, -1], [-1, 1]]:
+        for direction in list(product([-1, 1], [-1, 1])):
             moves, attacks = self.check_diagonal(direction, chessboard)
             if moves:
                 available_moves += moves
@@ -98,10 +97,11 @@ class Knight(Piece):
             next_position = current_position + direction
             if self.check_move(tuple(next_position)):
                 piece = chessboard[tuple(next_position)]
-                if chessboard[tuple(next_position)] == None:
+
+                if piece == None:
                     available_moves.append(tuple(next_position))
-                    # (2, 6)
-                elif isinstance(chessboard[tuple(next_position)], Piece) and chessboard[tuple(next_position)].color != self.color:
+
+                elif isinstance(piece, Piece) and piece.color != self.color:
                     available_attacks.append(tuple(next_position))
 
         return available_moves, available_attacks
@@ -135,7 +135,7 @@ class King(Piece):
         for direction in [[0, 1], [0, -1], [-1, 0], [1, 0], [1, 1], [1, -1], [-1, -1], [-1, 1]]:
             _, attacks = self.check_diagonal(direction, chessboard)
             all_attacks += attacks
-        
+
         if all_attacks:
             for position in all_attacks:
                 piece = chessboard[position]
@@ -145,6 +145,7 @@ class King(Piece):
 
         for next_position in [[2, 1], [2, -1], [-2, 1], [-2, -1], [1, 2], [1, -2], [-1, 2], [-1, -2]]:
             move = tuple(current_position + next_position)
+
             if self.check_move(move):
                 piece = chessboard[move]
                 if str(piece) in ['h', 'H'] and piece.color != self.color:
@@ -166,6 +167,18 @@ class King(Piece):
 
                 elif isinstance(chessboard[tuple(next_position)], Piece) and chessboard[tuple(next_position)].color != self.color:
                     available_attacks.append(tuple(next_position))
+
+        if self.start_position:
+            rook_l = chessboard[self.x, 0]
+            rook_position_r = chessboard[self.x, 7]
+            if isinstance(rook_l, Rook) and rook_l.color == self.color and rook_l.start_position:
+                rochade = True
+                for i in range(1, 4):
+                    if chessboard[self.x, i]:
+                        rochade = False
+                        break
+                if rochade:
+                    self.moves.append({'type': 'rochade', 'move': (self.x, 3)})
 
         return available_moves, available_attacks
 
