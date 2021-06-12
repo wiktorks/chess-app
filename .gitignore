@@ -131,3 +131,6 @@ dmypy.json
 # vscode files
 *.code-workspace
 .vscode/
+
+# system files
+.directory
