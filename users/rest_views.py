@@ -27,6 +27,8 @@ class SampleView(views.APIView):
         return Response(content)
 
 
+# Spróbuj też mixinem
+
 class RegistrationView(views.APIView):
     def post(self, request, format=None):
         user_serializer = RegistrationSerializer(data=request.data)
