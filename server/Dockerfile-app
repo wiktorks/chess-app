@@ -3,7 +3,7 @@ FROM python:3.9.5
 ENV LANG C.UTF-8
 ENV LC_ALL C.UTF-8
 
-RUN apt-get update && apt-get install -y apt-xapian-index 
+# RUN apt-get update && apt-get install -y apt-xapian-index 
 
 RUN mkdir /app
 COPY requirements.txt /app

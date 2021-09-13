@@ -65,10 +65,7 @@ class ChessBoard:
         moves, attacks = piece.get_moves(self.chessboard)
         all_moves = moves + attacks
 
-        if enemy_turn:
-            king = deepcopy(self.kings['W' if self.turn == 'B' else 'B'])
-        else:
-            king = deepcopy(self.kings[self.turn])
+        king = deepcopy(self.kings['W' if self.turn == 'B' else 'B']) if enemy_turn else deepcopy(self.kings[self.turn])
 
         def filter_check_moves(move):
             chessboard_copy = np.copy(self.chessboard)
