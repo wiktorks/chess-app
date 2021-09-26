@@ -1,0 +1,8 @@
+FROM node:14
+
+WORKDIR /app
+
+COPY ./front-end/package.json .
+COPY ./front-end/package-lock.json .
+
+RUN npm install
