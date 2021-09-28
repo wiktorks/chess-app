@@ -1,19 +1,21 @@
 from django.urls import path
 from django.urls.conf import include
-from . import rest_views
+from users.rest_views import RegisterUserView, UserViewSet, ModifyUserView
 from rest_framework.routers import DefaultRouter
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
     TokenRefreshView,
 )
 
-user_router = DefaultRouter()
-user_router.register('users', rest_views.UserViewSet, basename='users')
+profile_router = DefaultRouter()
+profile_router.register('', UserViewSet, basename='user-profile')
 
 urlpatterns = [
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
-    path('users/', include(user_router.urls)),
-    path('register/', rest_views.RegistrationView.as_view(), name='register'),
-    path('protected/', rest_views.SampleView.as_view(), name='protected_view')
+
+    path('profiles/', include(profile_router.urls), name='user-display'),
+    path('action/profiles/<int:pk>/', ModifyUserView.as_view(), name='user-modify'),
+
+    path('register/', RegisterUserView.as_view(), name='user-register')
 ]

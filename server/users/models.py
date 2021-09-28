@@ -10,3 +10,7 @@ class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=CASCADE)
     matches_won = models.PositiveIntegerField(default=0)
     matches_lost = models.PositiveIntegerField(default=0)
+    matches_draw = models.PositiveIntegerField(default=0)
+
+    def __str__(self):
+        return f'Profile: {self.user.username}'
