@@ -1,40 +1,33 @@
+from rest_framework.viewsets import GenericViewSet
+from rest_framework.mixins import (
+    RetrieveModelMixin,
+    UpdateModelMixin,
+    ListModelMixin,
+    DestroyModelMixin
+)
+from rest_framework.generics import CreateAPIView
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from django.contrib.auth.models import User
-from rest_framework import viewsets, views
-from rest_framework import permissions
-from .serializers import UserSerializer, RegistrationSerializer
-from rest_framework.response import Response
-from users.models import Profile
+
+from users.serializers import UserSerializer, RegisterUserSerializer
 
 #! queryset i serializer class można sparametryzować metodami self.get_query_set/get_serializer_class
 # Flaga permissions/groups (lepiej groups)
 # thunderclient -> dodatek na vscode
 
 
-class UserViewSet(viewsets.ModelViewSet):
-    """
-    API endpoint that allows users to be viewed or edited.
-    """
+class UserViewSet(
+    ListModelMixin,
+    RetrieveModelMixin,
+    UpdateModelMixin,
+    DestroyModelMixin,
+    GenericViewSet
+):
+    permission_classes = [IsAuthenticatedOrReadOnly]
+    queryset = User.objects.all()
     serializer_class = UserSerializer
-    queryset = Profile.objects.all()
-    # permission_classes = [permissions.IsAuthenticated]
 
-
-class SampleView(views.APIView):
-    permission_classes = [permissions.IsAuthenticated]
-
-    def get(self, request):
-        content = {'message': 'Sample protected view'}
-        return Response(content)
-
-
-# Spróbuj też mixinem
-
-class RegistrationView(views.APIView):
-    def post(self, request, format=None):
-        user_serializer = RegistrationSerializer(data=request.data)
-        if user_serializer.is_valid():
-            user_serializer.save()
-            return Response(user_serializer.data)
-
-        else:
-            return Response(user_serializer.errors)
+# POST
+class RegisterUserView(CreateAPIView):
+    queryset = User.objects.all()
+    serializer_class = RegisterUserSerializer
