@@ -9,7 +9,7 @@ from users.models import Profile
 class ProfileSerializer(ModelSerializer):
     class Meta:
         model = Profile
-        fields = '__all__'
+        fields = ['id', 'matches_won', 'matches_lost', 'matches_draw', 'description']
 
 
 class UserSerializer(ModelSerializer):
@@ -21,11 +21,12 @@ class UserSerializer(ModelSerializer):
 
 # Update zrobić w Views
     def update(self, instance, validated_data):
-        instance.username = validated_data['username']
-        instance.email = validated_data['email']
-        # instance.profile = validated_data['profile']
+        profile_data = validated_data.pop('profile')
+        profile_serializer = ProfileSerializer(instance=instance.profile, data=profile_data)
+        if profile_serializer.is_valid():
+            profile_serializer.save()
 
-        return instance
+        return super().update(instance, validated_data)  
 
 
 class RegisterUserSerializer(ModelSerializer):

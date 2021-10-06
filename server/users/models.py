@@ -11,6 +11,7 @@ class Profile(models.Model):
     matches_won = models.PositiveIntegerField(default=0)
     matches_lost = models.PositiveIntegerField(default=0)
     matches_draw = models.PositiveIntegerField(default=0)
+    description = models.TextField(max_length=1000, default='')
 
     def __str__(self):
         return f'Profile: {self.user.username}'
