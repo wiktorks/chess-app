@@ -6,12 +6,12 @@ ENV LC_ALL C.UTF-8
 # RUN apt-get update && apt-get install -y apt-xapian-index 
 
 RUN mkdir /app
-COPY requirements.txt /app
+COPY ./server/requirements.txt /app
 
 
 RUN pip install -r /app/requirements.txt
 
-COPY ./ /app
+COPY ./server /app
 WORKDIR /app
 
 # ENTRYPOINT ["python", "manage.py", "runserver", "0.0.0.0:8000"]
