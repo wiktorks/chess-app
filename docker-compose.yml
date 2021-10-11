@@ -11,13 +11,15 @@ services:
       - "3000:3000"
 
     command: npm run start-dev
+    # networks:
+    #   - main
     depends_on:
       - backend
 
   backend:
     build:
-      context: ./server/
-      dockerfile: Dockerfile-app
+      context: .
+      dockerfile: ./docker/Dockerfile-server
     volumes:
       - ./server/:/app
     ports:
@@ -25,6 +27,8 @@ services:
     env_file:
       - ./server/.env
     command: python manage.py runserver 0.0.0.0:8000
+    # networks:
+    #   - main
 
     depends_on:
       - db_default
@@ -38,5 +42,18 @@ services:
       POSTGRES_DB: "db"
     ports:
       - "5432:5432"
+    # networks:
+    #   - main
 
-  # server:
+  rabbitmq:
+    hostname: rabbitmq
+    image: rabbitmq:3.9.7
+    environment:
+      - RABBITMQ_DEFAULT_USER=admin
+      - RABBITMQ_DEFAULT_PASS=mypass
+    # networks:
+    #   - main
+    ports:
+      - "5672:5672"
+    restart: on-failure
+
