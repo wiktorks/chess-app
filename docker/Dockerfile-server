@@ -1,0 +1,12 @@
+FROM python:3.9.5
+
+ENV LANG C.UTF-8
+ENV LC_ALL C.UTF-8
+
+RUN mkdir /app
+COPY ./server/requirements.txt /app
+
+
+RUN pip install -r /app/requirements.txt
+
+WORKDIR /app

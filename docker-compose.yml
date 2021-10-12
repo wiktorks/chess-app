@@ -16,20 +16,21 @@ services:
 
   backend:
     build:
-      context: ./server/
-      dockerfile: Dockerfile-app
+      context: .
+      dockerfile: ./docker/Dockerfile-server
     volumes:
       - ./server/:/app
     ports:
       - "8000:8000"
     env_file:
       - ./server/.env
+      - ../env/email.env
     command: python manage.py runserver 0.0.0.0:8000
 
     depends_on:
-      - db_default
+      - db
 
-  db_default:
+  db:
     image: "postgres:13.0"
     hostname: db
     environment:
@@ -39,4 +40,29 @@ services:
     ports:
       - "5432:5432"
 
-  # server:
+  rabbitmq:
+    hostname: rabbitmq
+    image: rabbitmq:3.9.7
+    environment:
+      - RABBITMQ_DEFAULT_USER=admin
+      - RABBITMQ_DEFAULT_PASS=mypass
+    ports:
+      - "5672:5672"
+    restart: on-failure
+    logging:
+      driver: none
+
+  celery:
+    hostname: celery
+    build:
+      context: .
+      dockerfile: ./docker/Dockerfile-server
+    command: celery -A chess_app worker -l info
+    volumes:
+      - ./server/:/app
+    depends_on:
+      - db
+      - rabbitmq
+    env_file:
+      - ./server/.env
+      - ../env/email.env
