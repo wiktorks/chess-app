@@ -142,6 +142,7 @@ ALLOWED_HOSTS = ['localhost']
 
 
 # Email settings
+# Do wysyłania mail wykorzystuje się brokera (https://aws.amazon.com/ses/)
 
 DEFAULT_FROM_EMAIL = environ.get('DEFAULT_FROM_EMAIL')
 

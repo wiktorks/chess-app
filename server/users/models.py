@@ -12,6 +12,7 @@ class Profile(models.Model):
     matches_lost = models.PositiveIntegerField(default=0)
     matches_draw = models.PositiveIntegerField(default=0)
     description = models.TextField(max_length=1000, default='')
+    email_verified = models.BooleanField(default=False)
 
     def __str__(self):
         return f'Profile: {self.user.username}'
