@@ -30,6 +30,21 @@ services:
     depends_on:
       - db
 
+  backend-game:
+    build:
+      context: .
+      dockerfile: ./docker/Dockerfile-game-server
+    volumes:
+      - ./game_server/:/app
+    ports:
+      - 5050:5050
+    env_file:
+      - ./game_server/.env
+    command: python -u server.py
+
+    depends_on:
+      - backend
+
   db:
     image: "postgres:13.0"
     hostname: db
