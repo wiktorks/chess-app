@@ -1,34 +1,11 @@
 import asyncio
 import random
 import json
+import os
 
 from game_logic.chessboard import ChessBoard, ChessError
 from player import Player
 
-# Wrzuć to do env-ów
-# Tego typu argumenty lepiej przesyłać do funkcji
-# HEADER = 64
-# PORT = 5050
-# HOST = socket.gethostbyname(socket.gethostname())
-# ADDR = (HOST, PORT)
-# FORMAT = 'utf-8'
-# AWAITING = '!AWAITING'
-# TURN = '!TURN'
-# DISCONNECT_MESSAGE = '!DISCONNECT'
-
-# server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-# server.bind(ADDR)
-
-
-# player_move = {
-#     'type': 'move',
-#     'piece': [3, 1],
-#     'move': [3, 3],
-#     'color': 'W/B',
-#     'isCheck': False # True
-# }
-
-# Stwórz singletona z klasy Server!!!
 
 class Server:
     header = 64
@@ -137,18 +114,10 @@ class Server:
 
 
 def main():
-    server = Server('127.0.0.1', 5050)
+    hostname = os.environ.get('HOST_NAME')
+    port = os.environ.get('PORT_NUMBER')
+    server = Server(hostname, port)
     asyncio.run(server.start())
 
 
 main()
-# dobrze dać header z długością wiadomości jako pierwsza wiadomość
-
-# tab nine -> dodatek do pythona, kite
-
-
-#
-# Front -> Django
-#
-#
-# Front (gry) -> server socket
