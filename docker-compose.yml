@@ -25,7 +25,7 @@ services:
     env_file:
       - ./server/.env
       - ../env/email.env
-    command: python manage.py runserver 0.0.0.0:8000
+    command: python -u manage.py runserver 0.0.0.0:8000
 
     depends_on:
       - db

@@ -60,7 +60,7 @@ enemy_move_response = {
 
 async def tcp_echo_client():
     reader, writer = await asyncio.open_connection(
-        '127.0.0.1', 5050)
+        '0.0.0.0', 5050)
     
     player_name = ''.join(random.choices(string.ascii_uppercase + string.digits, k=7))
     player = Player(player_name, reader, writer)

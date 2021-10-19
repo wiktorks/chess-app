@@ -2,9 +2,12 @@ import asyncio
 import random
 import json
 import os
+from dotenv import load_dotenv
 
 from game_logic.chessboard import ChessBoard, ChessError
 from player import Player
+# from .game_logic.chessboard import ChessBoard, ChessError
+# from .player import Player
 
 
 class Server:
@@ -114,6 +117,7 @@ class Server:
 
 
 def main():
+    load_dotenv()
     hostname = os.environ.get('HOST_NAME')
     port = os.environ.get('PORT_NUMBER')
     server = Server(hostname, port)
