@@ -1,9 +1,6 @@
 import React from 'react'
+import AuthForm from '../components/Auth/AuthForm'
 
 export const AuthPage = () => {
-    return (
-        <div>
-            
-        </div>
-    )
+    return <AuthForm />
 }

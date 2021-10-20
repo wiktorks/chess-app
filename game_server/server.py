@@ -6,8 +6,6 @@ from dotenv import load_dotenv
 
 from game_logic.chessboard import ChessBoard, ChessError
 from player import Player
-# from .game_logic.chessboard import ChessBoard, ChessError
-# from .player import Player
 
 
 class Server:
