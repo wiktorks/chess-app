@@ -1,13 +1,16 @@
-import { useState, useRef, FormEvent } from "react";
+import { useState, useRef, FormEvent, useContext } from "react";
 import Form from "react-bootstrap/Form";
 import Button from "react-bootstrap/Button";
 import { Container, Row, Col } from "react-bootstrap";
+import { AuthContext } from "../../store/auth-context";
 
 const AuthForm = () => {
   const userInputRef = useRef<HTMLInputElement | null>(null);
   const emailInputRef = useRef<HTMLInputElement | null>(null);
   const passwordInputRef = useRef<HTMLInputElement | null>(null);
   const password2InputRef = useRef<HTMLInputElement | null>(null);
+
+  const authCtx = useContext(AuthContext);
 
   const [isLogin, setIsLogin] = useState(true);
 
@@ -16,36 +19,60 @@ const AuthForm = () => {
   };
 
   const submitHandler = (event: FormEvent) => {
+    interface LoginFormSubmit {
+      username: string;
+      password: string;
+      email?: string;
+      password2?: string;
+    }
+
     event.preventDefault();
 
-    const enteredEmail = emailInputRef.current!.value;
+    const enteredLogin = userInputRef.current!.value;
     const enteredPassword = passwordInputRef.current!.value;
 
+    let url;
+    let body: LoginFormSubmit;
+
     if (isLogin) {
-      let a = 1;
+      url = "http://0.0.0.0:8000/api/auth/token/";
+      body = {
+        username: enteredLogin,
+        password: enteredPassword,
+      };
     } else {
-      const enteredLogin = userInputRef.current!.value;
+      const enteredEmail = emailInputRef.current!.value;
       const enteredPassword2 = password2InputRef.current!.value;
-      fetch("http://0.0.0.0:8000/api/auth/register/", {
-        method: "POST",
-        body: JSON.stringify({
-          username: enteredLogin,
-          email: enteredEmail,
-          password: enteredPassword,
-          password2: enteredPassword2,
-        }),
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }).then((res) => {
-        if (res.ok) {
-        } else {
-          res.json().then((data) => {
-            console.log(data);
-          });
-        }
-      });
+      url = "http://0.0.0.0:8000/api/auth/register/";
+      body = {
+        username: enteredLogin,
+        email: enteredEmail,
+        password: enteredPassword,
+        password2: enteredPassword2,
+      };
     }
+    fetch(url, {
+      method: "POST",
+      body: JSON.stringify(body),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+      .then(async (res) => {
+        if (res.ok) {
+          return res.json();
+        } else {
+          // const data = await res.json();
+          let errorMessage = "Authentication failed!";
+          throw new Error(errorMessage);
+        }
+      })
+      .then((data) => {
+        authCtx.login(data.access);
+      })
+      .catch((err) => {
+        alert(err.message);
+      });
   };
 
   return (
@@ -57,21 +84,21 @@ const AuthForm = () => {
             <Form.Group className="mb-3" controlId="formBasicEmail">
               {!isLogin ? (
                 <>
-                  <Form.Label>Your Username</Form.Label>
+                  <Form.Label>Your Email</Form.Label>
                   <Form.Control
-                    type="text"
-                    placeholder="Enter username"
-                    ref={userInputRef}
+                    type="email"
+                    placeholder="Enter email"
+                    ref={emailInputRef}
                     required
                   />
                 </>
               ) : null}
 
-              <Form.Label>Your Email</Form.Label>
+              <Form.Label>Your Username</Form.Label>
               <Form.Control
-                type="email"
-                placeholder="Enter email"
-                ref={emailInputRef}
+                type="text"
+                placeholder="Enter username"
+                ref={userInputRef}
                 required
               />
             </Form.Group>
