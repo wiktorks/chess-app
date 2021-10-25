@@ -5,18 +5,18 @@ from rest_framework.mixins import (
     ListModelMixin,
     DestroyModelMixin
 )
-from rest_framework.generics import CreateAPIView
-from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from rest_framework.generics import CreateAPIView, UpdateAPIView
+from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
 from django.contrib.auth.models import User
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from django.utils.encoding import force_bytes, force_text
+from django.utils.encoding import force_bytes
 from django.contrib.sites.shortcuts import get_current_site
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 
 from .tokens import account_activation_token
-from users.serializers import UserSerializer, RegisterUserSerializer
+from users.serializers import PasswordResetSerializer, UserSerializer, RegisterUserSerializer
 from .tasks import send_activation_email_task
 
 #! queryset i serializer class można sparametryzować metodami self.get_query_set/get_serializer_class
@@ -24,18 +24,15 @@ from .tasks import send_activation_email_task
 # thunderclient -> dodatek na vscode
 
 
-class UserViewSet(
-    ListModelMixin,
-    RetrieveModelMixin,
-    UpdateModelMixin,
-    DestroyModelMixin,
-    GenericViewSet
-):
+class UserViewSet(ListModelMixin, RetrieveModelMixin, UpdateModelMixin,
+                  DestroyModelMixin, GenericViewSet):
     permission_classes = [IsAuthenticatedOrReadOnly]
     queryset = User.objects.all()
     serializer_class = UserSerializer
 
-# uuid4 - standard tworzenia id, generuje losowy ciąg znaków 
+# uuid4 - standard tworzenia id, generuje losowy ciąg znaków
+
+
 class RegisterUserView(CreateAPIView):
     queryset = User.objects.all()
     serializer_class = RegisterUserSerializer
@@ -56,6 +53,7 @@ class RegisterUserView(CreateAPIView):
 # domain.com/subdomain?id=<id>
 # 19.10: 16:30
 
+
 class ActivateAccountView(APIView):
     def get(self, request, uidb64, token):
         user_id = urlsafe_base64_decode(uidb64)
@@ -73,3 +71,12 @@ class ActivateAccountView(APIView):
             }, status=status.HTTP_400_BAD_REQUEST)
 
 
+class ResetPasswordView(UpdateAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = PasswordResetSerializer
+
+    def get_object(self):
+        return self.request.user
+
+    def get_serializer_context(self):
+        return {'request': self.request}
