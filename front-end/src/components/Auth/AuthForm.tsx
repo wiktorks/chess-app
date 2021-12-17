@@ -1,4 +1,5 @@
 import { useState, useRef, FormEvent, useContext } from "react";
+import { useHistory } from "react-router-dom";
 import Form from "react-bootstrap/Form";
 import Button from "react-bootstrap/Button";
 import { Container, Row, Col } from "react-bootstrap";
@@ -9,6 +10,8 @@ const AuthForm = () => {
   const emailInputRef = useRef<HTMLInputElement | null>(null);
   const passwordInputRef = useRef<HTMLInputElement | null>(null);
   const password2InputRef = useRef<HTMLInputElement | null>(null);
+
+  const history = useHistory();
 
   const authCtx = useContext(AuthContext);
 
@@ -69,6 +72,7 @@ const AuthForm = () => {
       })
       .then((data) => {
         authCtx.login(data.access);
+        history.replace('/');
       })
       .catch((err) => {
         alert(err.message);

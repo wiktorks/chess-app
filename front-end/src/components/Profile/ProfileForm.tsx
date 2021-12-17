@@ -1,5 +1,6 @@
 import { FormEvent, useRef, useContext } from "react";
 import { Button, Col, Container, Form, Row } from "react-bootstrap";
+import { useHistory } from "react-router-dom";
 
 import { AuthContext } from "../../store/auth-context";
 
@@ -8,6 +9,8 @@ export const ProfileForm = () => {
   const newPasswordInputRef = useRef<HTMLInputElement | null>(null);
   const newPassword2InputRef = useRef<HTMLInputElement | null>(null);
 
+  const history = useHistory();
+
   const authCtx = useContext(AuthContext);
 
   const submitHandler = (event: FormEvent) => {
@@ -15,7 +18,7 @@ export const ProfileForm = () => {
     const enteredOldPassword = oldPasswordInputRef.current!.value;
     const enteredNewPassword = newPasswordInputRef.current!.value;
     const enteredNewPassword2 = newPassword2InputRef.current!.value;
-    console.log(authCtx.token)
+    console.log(authCtx.token);
     fetch("http://0.0.0.0:8000/api/auth/password-reset/", {
       method: "PUT",
       body: JSON.stringify({
@@ -30,6 +33,7 @@ export const ProfileForm = () => {
     })
       .then(async (res) => {
         if (res.ok) {
+          history.replace("/");
           return res.json();
         } else {
           let errorMessage = "Password reset failed failed!";

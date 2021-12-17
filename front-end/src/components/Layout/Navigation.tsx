@@ -10,6 +10,10 @@ export const Navigation = () => {
   const authCtx = useContext(AuthContext);
   const isLoggedIn = authCtx.isLoggedIn;
 
+  const logoutHandler = () => {
+    authCtx.logout();
+  }
+
   return (
     <Navbar collapseOnSelect expand="lg" bg="dark" variant="dark">
       <Container>
@@ -27,7 +31,7 @@ export const Navigation = () => {
             ) : (
               <>
                 <Link to="/profile">Profile</Link>
-                <Nav.Link>Logout</Nav.Link>
+                <Nav.Link onClick={logoutHandler}>Logout</Nav.Link>
               </>
             )}
           </Nav>
