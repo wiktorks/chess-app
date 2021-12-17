@@ -41,7 +41,6 @@ class RegisterUserView(CreateAPIView):
         user = serializer.save(user=self.request.user)
 # wzorzec obserwator
         current_site = get_current_site(self.request)
-        print(f'User email -------> "{user.email}"')
         send_activation_email_task.delay(
             current_site.domain,
             urlsafe_base64_encode(force_bytes(user.pk)),
