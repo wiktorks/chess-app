@@ -1,3 +1,4 @@
 *.code-workspace
 *.directory
 .vscode/
+*.env

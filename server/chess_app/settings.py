@@ -160,6 +160,7 @@ EMAIL_USE_TLS = True
 # CELERY
 
 CELERY_BROKER_URL = environ.get('CELERY_CREDENTIALS')
+# CELERY_BROKER_URL = 'amqp://admin:mypass@rabbitmq:5672'
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 

@@ -23,9 +23,10 @@ services:
     ports:
       - "8000:8000"
     env_file:
-      - ./server/.env
-      - ../env/email.env
-    command: python -u manage.py runserver 0.0.0.0:8000
+      - config.env
+    command: > 
+      bash -c "python manage.py migrate &&
+      python manage.py runserver 0.0.0.0:8000"
 
     depends_on:
       - db
@@ -79,5 +80,4 @@ services:
       - db
       - rabbitmq
     env_file:
-      - ./server/.env
-      - ../env/email.env
+      - config.env
