@@ -1,22 +1,52 @@
 version: "3.5"
 
 services:
-  app: 
+  frontend:
     build:
-      context: ./server/
-      dockerfile: Dockerfile-app
+      context: .
+      dockerfile: ./docker/Dockerfile-frontend
+    volumes:
+      - ./front-end/:/app
+    ports:
+      - "3000:3000"
+
+    command: npm run start-dev
+    depends_on:
+      - backend
+
+  backend:
+    build:
+      context: .
+      dockerfile: ./docker/Dockerfile-server
     volumes:
       - ./server/:/app
     ports:
       - "8000:8000"
-    env_file: 
-      - ./server/.env
-    command: python manage.py runserver 0.0.0.0:8000
+    env_file:
+      - config.env
+    command: > 
+      bash -c "python manage.py migrate &&
+      python manage.py runserver 0.0.0.0:8000"
 
-    depends_on: 
-      - db_default
+    depends_on:
+      - db
 
-  db_default:
+  backend-game:
+    build:
+      context: .
+      dockerfile: ./docker/Dockerfile-game-server
+    volumes:
+      - ./game_server/:/app
+    ports:
+      - 5050:5050
+    env_file:
+      - ./game_server/.env
+    command: python -u server.py
+
+    depends_on:
+      - backend
+
+  db:
     image: "postgres:13.0"
     hostname: db
     environment:
@@ -25,6 +55,29 @@ services:
       POSTGRES_DB: "db"
     ports:
       - "5432:5432"
-    
 
-  # server:
+  rabbitmq:
+    hostname: rabbitmq
+    image: rabbitmq:3.9.7
+    environment:
+      - RABBITMQ_DEFAULT_USER=admin
+      - RABBITMQ_DEFAULT_PASS=mypass
+    ports:
+      - "5672:5672"
+    restart: on-failure
+    logging:
+      driver: none
+
+  celery:
+    hostname: celery
+    build:
+      context: .
+      dockerfile: ./docker/Dockerfile-server
+    command: celery -A chess_app worker -l info
+    volumes:
+      - ./server/:/app
+    depends_on:
+      - db
+      - rabbitmq
+    env_file:
+      - config.env

@@ -1,6 +1,6 @@
 import numpy as np
 from copy import deepcopy
-from .pieces import Piece, Pawn, Queen, King, Rook, Bishop
+from .pieces import Piece, Pawn, Queen, King, Rook, Bishop, Knight
 # Zamiast * lepiej wylistować wszystkie rzeczy z modułu (wydajniej)
 
 class ChessError(Exception):
