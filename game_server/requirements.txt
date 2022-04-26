@@ -1,5 +1,8 @@
+attrs==21.4.0
 autopep8==1.5.7
+jsonschema==4.4.0
 numpy==1.21.2
 pycodestyle==2.8.0
+pyrsistent==0.18.1
 python-dotenv==0.19.1
 toml==0.10.2

@@ -1,25 +1,25 @@
 import asyncio
-import random
-import json
 import os
+from queue import Queue
 from dotenv import load_dotenv
 
 from game_logic.chessboard import ChessBoard, ChessError
-from utils.player import Player
-from utils.messages import validate_join
-from utils.messages import validate_move
+from utils.player import Player, SocketHandler
 
 
 class Server:
+    """Main class for chess server"""
+
     header = 64
-    game_queue = []
+    __player_queue = Queue()
+    __players_connected = 0
 
     def __init__(self, address, port, str_format="utf-8"):
         self.address = address
         self.port = port
         self.format = str_format
 
-    async def handle_game(self, player1, player2):
+    async def _handle_game(self, player1, player2):
         """
         1. Pobierz pion i ruch od gracza
         2. sprawdź czy ruch poprawny
@@ -29,26 +29,20 @@ class Server:
         7. goto 1.
         """
         game = ChessBoard()
-        moving, awaiting = (
-            (player1, player2) if player1.color == "W" else (player2, player1)
-        )
-        await moving.send(
-            {
-                "type": "game_start",
-                "assigned_color": moving.color,
-                "enemy_player": awaiting.name,
-            }
-        )
-        await awaiting.send(
-            {
-                "type": "game_start",
-                "assigned_color": awaiting.color,
-                "enemy_player": moving.name,
-            }
-        )
+        players = {"p1": player1, "p2": player2}
+        player_turn = "p1" if player1.color == "W" else "p2"
+        for player in players.values():
+            await player.send(
+                {
+                    "type": "game_start",
+                    "assigned_color": player.color,
+                    "enemy_player": player.name,
+                }
+            )
+
         playing = True
         while playing:
-            move = await moving.receive(validate_move)
+            move = await players[player_turn].receive()
             print(move)
             try:
                 if move["type"] == "chess-move":
@@ -56,59 +50,63 @@ class Server:
                     game.move_piece(game_piece, game_move)
                     game_status = game.get_game_status()
                     game.print_board()
-                    await moving.send(
+                    await players[player_turn].send(
                         {
                             "type": "success",
                             "status": game_status,
                             "board": game.get_board(),
                         }
                     )
-                    await awaiting.send({"type": "move", "move": move})
-                # wrzuć playerów do dicta i zmieniaj klucze
-                moving, awaiting = (awaiting, moving)
+                    await players["p1" if player_turn == "p2" else "p2"].send(
+                        {"type": "move", "move": move}
+                    )
+                player_turn = "p1" if player_turn == "p2" else "p2"
+
             except ChessError as chess_error:
                 print(chess_error)
-                await moving.send({"type": "chess error", "message": str(chess_error)})
+                await players[player_turn].send(
+                    {"type": "chess error", "message": str(chess_error)}
+                )
 
     # cors -> do bezpiecznego dzielenia się zasobami
     # endpoint -> permission robisz socket server i wrzucasz w payload
     # Self signed certificate
 
-    async def handle_player(self, reader, writer):
-        message = await reader.read(200)
-        message = message.decode(self.format)
-        player_data = json.loads(message)
+    async def _handle_player(self, reader, writer):
+        socket_handler = SocketHandler(reader, writer)
+        player_data = await socket_handler.receive()
 
         if "name" not in player_data.keys():
             raise KeyError("Wrong connect message from player")
 
-        writer.write(
-            json.dumps(
-                {
-                    "type": "search_game",
-                    "status": "success",
-                    "message": "searching for player",
-                }
-            ).encode(self.format)
+        await socket_handler.send(
+            {
+                "type": "search_game",
+                "status": "success",
+                "message": "searching for player",
+            }
         )
-        await writer.drain()
 
-        player = Player(player_data["name"], reader, writer)
-        # Global interpreter lock (GIL) w Pythonie
+        player = Player(player_data["name"], socket_handler)
+        print(f"[ PLAYER CONNECTED ] Player with name {player_data['name']} connected.")
         queue_lock = asyncio.Lock()
         async with queue_lock:
-            self.game_queue.append(player)
+            self.__player_queue.put(player)
 
-            if len(self.game_queue) >= 2:
-                player_color = random.choice(["W", "B"])
-                player1 = self.game_queue.pop()
-                player1.assign_color(player_color)
-                player2 = self.game_queue.pop()
-                player2.assign_color("W" if player_color == "B" else "B")
-                asyncio.create_task(self.handle_game(player1, player2))
+            if self.__player_queue.qsize() >= 2:
+                player1 = self.__player_queue.get()
+                player1.assign_color("W")
+
+                player2 = self.__player_queue.get()
+                player2.assign_color("B")
+
+                asyncio.create_task(self._handle_game(player1, player2))
 
     async def start(self):
-        server = await asyncio.start_server(self.handle_player, self.address, self.port)
+        """Starts chess server and listens for incoming client connections"""
+        server = await asyncio.start_server(
+            self._handle_player, self.address, self.port
+        )
         assigned_address = server.sockets[0].getsockname()
         print(f"[ RUNNING ] Server is running on {assigned_address}:{self.port}")
 
@@ -117,6 +115,7 @@ class Server:
 
 
 def main():
+    """Main function to start server"""
     load_dotenv()
     hostname = os.environ.get("HOST_NAME")
     port = os.environ.get("PORT_NUMBER")

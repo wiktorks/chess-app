@@ -1,25 +1,31 @@
-class ClientInputError(Exception):
-    def __init__(self, socket_message_type, error_message):
-        self.sockert_message_type = socket_message_type
-        self.error_message = error_message
+from jsonschema import validate
 
 
-def validate_join(**kwargs):
-    if kwargs.get("type") != "join" or not isinstance(kwargs.get("name"), str):
-        raise ClientInputError("join", "Wrong message type")
+class Message:
+    """Base class for chess socket game messages"""
 
-    return kwargs
+    def dict(self):
+        """Get dict representation of the message object"""
+        return self.__dict__
 
 
-def validate_move(**kwargs):
-    if (
-        not kwargs.get("piece")
-        or not isinstance(kwargs.get("piece"), str)
-        or len(kwargs.get("piece")) != 2
-        or not kwargs.get("move")
-        or not isinstance(kwargs.get("move"), str)
-        or len(kwargs.get("move")) != 2
-    ):
-        raise ClientInputError("move", f"Wrong move message provided: {kwargs}")
+class ChessMoveMessage(Message):
+    request_schema = {
+        "type": "object",
+        "properties": {
+            "type": {"type": "string"},
+            "piece": {"type": "string", "pattern": "^[A-H][1-8]$"},
+            "position": {"type": "string", "pattern": "^[A-H][1-8]$"},
+        },
+    }
+    response_schema = {
+        "type": "object",
+        "properties": {
+            "status": {"type": "string"},
+            "game_info": {"type": "string", "pattern": "^[A-H][1-8]$"},
+            "board": {"type": "array"},
+        },
+    }
 
-    return kwargs
+    def __init__(self, message: dict):
+        super().__init__()
